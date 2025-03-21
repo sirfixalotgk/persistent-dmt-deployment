@@ -90,7 +90,7 @@ services:
       - openamtnetwork
   db:
     restart: always
-    image: postgres:15
+    image: postgres:17
     build:
       context: ./pg
       dockerfile: ./Dockerfile
