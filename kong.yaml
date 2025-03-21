@@ -171,7 +171,7 @@ consumers:
   - username: admin
 jwt_secrets:
   - consumer: admin
-    # capture key and secret from docker-compose.yml, sample key below
+    # capture key and secret from .env file, sample key below
     key: 9EmRJTbIiIb4bIeSsmgcWIjrR6HyETqc #sample key
     secret: 
 
