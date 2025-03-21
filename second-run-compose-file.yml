@@ -152,20 +152,17 @@ services:
     # parameters as seen in the original entrypoint but launch with exec so that it replaces
     # the process at PID 1 and is monitored correctly
     #
-    # Initial run utilizes original entrypoint.  Only after vault init do we switch to the
-    # scripted entrypoint
-    entrypoint: vault server -config=/vault/config/vault.json
+    # entrypoint: vault server -config=/vault/config/vault.json
     #
-    # Scripted entrypoint and healthcheck disabled until vault initialization has been completed.
-    #
-    # entrypoint: ["/bin/sh", "-c"]
-    # command: "/vault/data/bin/launch.sh"
-    # healthcheck:
-    #   test: [ "CMD", "vault", "status", "-address=http://127.0.0.1:8200", "-format=json" ]
-    #   interval: 10s
-    #   timeout: 3s
-    #   retries: 3
-    #   start_period: 15s
+    entrypoint: ["/bin/sh", "-c"]
+    command: "/vault/data/bin/launch.sh"
+    healthcheck:
+      # test: [ "CMD", "wget", "--spider", "--tries=1", "--no-verbose", "http://localhost:8200/v1/sys/health" ]
+      test: [ "CMD", "vault", "status", "-address=http://127.0.0.1:8200", "-format=json" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 15s
     restart: always
   kong:
     image: kong:2.3
@@ -195,9 +192,8 @@ services:
       - KONG_DNS_ORDER=LAST,A,CNAME
       - KONG_UPSTREAM_KEEPALIVE_POOL_SIZE=0
       # WebUI certificate persistence config
-      # Options are disabled for initial execution
-      # - KONG_SSL_CERT=/ssl/oAMT_WebUI_Provisioning.crt
-      # - KONG_SSL_CERT_KEY=/ssl/oAMT_WebUI_Provisioning.pem
+      - KONG_SSL_CERT=/ssl/oAMT_WebUI_Provisioning.crt
+      - KONG_SSL_CERT_KEY=/ssl/oAMT_WebUI_Provisioning.pem
     networks:
       - openamtnetwork
     volumes:
