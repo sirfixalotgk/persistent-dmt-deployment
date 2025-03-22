@@ -111,7 +111,7 @@ Function Init-Vault {
     } Catch { Write-Host -ForegroundColor RED "Failed!"; EXIT }
     Try {
         Write-Host -ForegroundColor CYAN "Adding KV engine..."
-        $sePayload = [PSCustomObject]@{
+        $sePayload = ([PSCustomObject]@{
             type = "kv"
                 options = [PSCustomObject]@{
                     version = "2"
