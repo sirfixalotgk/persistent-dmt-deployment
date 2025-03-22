@@ -54,6 +54,32 @@ Function Generate-Issuer {
     # return $Issuer
 }
 
+Function Prepare-Certificate {
+    Try {
+        Write-Host -ForegroundColor CYAN "PFX password needed to process private key:"
+        openssl pkcs12 -in ./$mpsCN.pfx -nocerts -out ./$mpsCN.key
+        Write-Host -ForegroundColor CYAN "PFX password needed to process certificate:"
+        openssl pkcs12 -in ./$mpsCN.pfx -clcerts -nokeys -out ./$mpsCN.crt
+        Write-Host -ForegroundColor CYAN "Enter and confirm a  password for private key file:"
+        openssl rsa -in ./$mpsCN.key -out ./$mpsCN.key
+        openssl rsa -in ./$mpsCN.key -outform PEM -out ./$mpsCN.pem
+    } Catch { Write-Host -ForegroundColor YELLOW "Failed to process certificate...continuing without it."; Return }
+    Try {
+        Move-Item *.pem ./kong-ssl/
+        Move-Item *.pfx ./kong-ssl/
+        Move-Item *.crt ./kong-ssl/
+        Move-Item *.key ./kong-ssl/
+        chmod 755 ./kong-ssl/*.*
+    } Catch { Write-Host -ForegroundColor YELLOW "Failed to process certificate...continuing without it."; Return }
+    Try {
+        cp ./docker-compose.yml ./pre-cert-compose-file.yml
+        $envCertUpdate = (Get-Content ./docker-compose.yml)
+        $envCertUpdate = $envCertUpdate.Replace('# - KONG_SSL_CERT=/ssl/oAMT_WebUI_Provisioning.crt', "- KONG_SSL_CERT=/ssl/$mpsCN.crt")
+        $envCertUpdate = $envCertUpdate.Replace('# - KONG_SSL_CERT=/ssl/oAMT_WebUI_Provisioning.pem', "- KONG_SSL_CERT=/ssl/$mpsCN.pem")
+        Set-Content ./docker-compose.yml -Value $envCertUpdate
+    } Catch { Write-Host -ForegroundColor YELLOW "Failed to process certificate...continuing without it."; Return }
+}
+
 Function Update-ConfigFiles {
     Try {
         Write-Host -ForegroundColor CYAN "Updating .env file now..."
@@ -93,8 +119,8 @@ Function Init-Vault {
     } Catch { Write-Host -ForegroundColor RED "Failed!"; EXIT }
     Try {
         Write-Host -ForegroundColor CYAN "Updating ENV file..."
-        $vaultKey = $initData.keys_base64
-        $vaultToken = $initData.root_token
+        $global:vaultKey = $initData.keys_base64
+        $global:vaultToken = $initData.root_token
         $envVaultFile = (Get-Content ./.env)
         $envVaultFile = $envVaultFile.Replace('VAULT_KEY=', "VAULT_KEY=$vaultKey")
         $envVaultFile = $envVaultFile.Replace('VAULT_TOKEN=', "VAULT_TOKEN=$vaultToken")
@@ -147,14 +173,18 @@ Write-Host -ForegroundColor CYAN "Holding for 5 seconds to allow Vault to reach 
 Start-Sleep 5
 Init-Vault
 
-Write-Host -ForegroundColor CYAN "Taking Vault down, building and bringing all online together..."
+Write-Host -ForegroundColor CYAN "`n`n`nTaking Vault down, building and bringing all online together..."
 docker-compose down -v
-Write-Host -ForegroundColor CYAN "Holding for 2 seconds to allow final sync time to complete..."
+Write-Host -ForegroundColor CYAN "`nHolding for 2 seconds to allow final sync time to complete..."
 Start-Sleep 2
-Write-Host -ForegroundColor CYAN "Replacing composition file with normal operations variant..."
+Write-Host -ForegroundColor CYAN "`nReplacing composition file with normal operations variant..."
 Move-Item ./docker-compose.yml ./initial-run-compose-file.yml -Force
 Move-Item ./second-run-compose-file.yml ./docker-compose.yml -Force
 Start-Sleep 2
-Write-Host -ForegroundColor CYAN "Bringing everything up according to dependency configuration..."
+If (Test-Path ./$mpsCN.pfx) {
+    Write-Host -ForegroundColor CYAN "`nCertificate PFX found.  Calling processing routine..."
+    Prepare-Certificate
+}
+Write-Host -ForegroundColor CYAN "`nBringing everything up according to dependency configuration..."
 docker-compose up -d --build
-Write-Host -ForegroundColor GREEN "Done!"
+Write-Host -ForegroundColor GREEN "Done!`n`nPlease the following values -`nVault Root Token: $vaultToken`nVault Unseal Key: $vaultKey"
