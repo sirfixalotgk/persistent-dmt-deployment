@@ -138,7 +138,7 @@ docker-compose pull
 docker-compose up -d --build vault
 Write-Host -ForegroundColor CYAN "Containers downloaded..."
 
-# Initialize Vault and configure
+# Initialize and configure Vault
 Write-Host -ForegroundColor CYAN "Holding for 5 seconds to allow Vault to reach ready state..."
 Start-Sleep 5
 Init-Vault
@@ -146,6 +146,10 @@ Init-Vault
 Write-Host -ForegroundColor CYAN "Taking Vault down, building and bringing all online together..."
 docker-compose down -v
 Write-Host -ForegroundColor CYAN "Holding for 2 seconds to allow final sync time to complete..."
+Start-Sleep 2
+Write-Host -ForegroundColor CYAN "Replacing composition file with normal operations variant..."
+Move-Item ./docker-compose.yml ./initial-run-compose-file.yml -Force
+Move-Item ./second-run-compose-file.yml ./docker-compose.yml -Force
 Start-Sleep 2
 Write-Host -ForegroundColor CYAN "Bringing everything up according to dependency configuration..."
 docker-compose up -d --build
