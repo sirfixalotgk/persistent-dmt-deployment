@@ -80,12 +80,71 @@ Function Update-ConfigFiles {
     Write-Host -ForegroundColor GREEN "Files updated!"
 }
 
-# Call functions to perform actions
+Function Init-Vault {
+    Try {
+        Write-Host -ForegroundColor CYAN "Initializing Vault..."
+        $initPayload = ([PSCustomObject]@{
+            secret_shares = 1
+            secret_threshold = 1
+        } | ConvertTo-JSON)
+        $global:initData = (Invoke-RestMethod -Uri http://localhost:8200/v1/sys/init -Method PUT -Body $initPayload)
+        Write-Host -ForegroundColor GREEN "Vault initialized!"
+    } Catch { Write-Host -ForegroundColor RED "Failed!"; EXIT }
+    Try {
+        Write-Host -ForegroundColor CYAN "Updating ENV file..."
+        $vaultKey = $initData.keys_base64
+        $vaultToken = $initData.root_token
+        $envVaultFile = (Get-Content ./.env)
+        $envVaultFile = $envVaultFile.Replace('VAULT_KEY=', "VAULT_KEY=$vaultKey")
+        $envVaultFile = $envVaultFile.Replace('VAULT_TOKEN=', "VAULT_TOKEN=$vaultToken")
+        Set-Content ./.env -Value $envVaultFile
+        Write-Host -ForegroundColor GREEN "Vault initialized!"
+    } Catch { Write-Host -ForegroundColor RED "Failed!"; EXIT }
+    Try {
+        Write-Host -ForegroundColor CYAN "Un-sealing Vault..."
+        $unSeal = ([PSCustomObject]@{
+            key = "$vaultKey"
+        } | ConvertTo-Json)
+        $unsealResult = (Invoke-RestMethod http://localhost:8200/v1/sys/unseal -Method POST -Body $unSeal)
+        Write-Host -ForegroundColor GREEN "Vault un-sealed!"
+    } Catch { Write-Host -ForegroundColor RED "Failed!"; EXIT }
+    Try {
+        Write-Host -ForegroundColor CYAN "Adding KV engine..."
+        $sePayload = ([PSCustomObject]@{
+            type = "kv"
+        } | ConvertTo-JSON)
+        $vaultHeader = [PSCustomObject]@{'X-Vault-Token' = $vaultToken}
+        $engineResult = (Invoke-RestMethod http://localhost:8200/v1/sys/mounts/kv -Method POST -Headers $vaultHeader -Body $sePayload)
+        Write-Host -ForegroundColor GREEN "Key Vault engine, enabled!"
+    } Catch { Write-Host -ForegroundColor RED "Failed!"; EXIT }
+}
+
+
+# Execution section:
+# 
+# Call functions and execute specific commands initialize and configure environment
+# Call function to generate random token:
 Generate-Token
+
+# Call function to generate random issuer:
 Generate-Issuer
+
+# Call function to update files with generated values:
 Update-ConfigFiles
 
-docker pull
-docker up -d --build vault
-$global:initData = (Invoke-RestMethod -Uri http://localhost:8200/v1/sys/init -Method GET)
-$initData
+# Work with the secret vault first
+Write-Host -ForegroundColor CYAN "Downloading Docker containers and initializing the secret store..."
+docker-compose pull
+docker-compose up -d --build vault
+Write-Host -ForegroundColor CYAN "Containers downloaded..."
+
+# Initialize Vault and configure
+Init-Vault
+
+Write-Host -ForegroundColor CYAN "Taking Vault down and bringing all online together..."
+docker-compose down -v
+Write-Host -ForegroundColor CYAN "Holding for 2 seconds to allow final sync time to complete..."
+Start-Sleep 2
+Write-Host -ForegroundColor CYAN "Bringing everything up according to dependency configuration..."
+docker-compose up -d --build
+Write-Host -ForegroundColor GREEN "Done!"
