@@ -68,14 +68,14 @@ Function Update-ConfigFiles {
         $envFile = $envFile.Replace('MPS_WEB_ADMIN_PASSWORD=', $webUiPass)
         $mpsCN = "MPS_COMMON_NAME=$mpsCN"
         $envFile = $envFile.Replace('MPS_COMMON_NAME=localhost', $mpsCN)
-        # Set-Content ./.env -Value $envFile
+        Set-Content ./.env -Value $envFile
     } Catch { Write-Host -ForegroundColor RED "Failed!"; Exit }
     Try {
         Write-Host -ForegroundColor CYAN "Updating Kong config file now..."
         $kongFile = (Get-Content ./kong.yaml)
         $kongFile = $kongFile.Replace('key: 9EmRJTbIiIb4bIeSsmgcWIjrR6HyETqc #sample key', $kongKey)
         $kongFile = $kongFile.Replace('secret:', $kongSecret)
-        # Set-Content ./kong.yaml -Value $kongFile
+        Set-Content ./kong.yaml -Value $kongFile
     } Catch { Write-Host -ForegroundColor RED "Failed!"; Exit }
     Write-Host -ForegroundColor GREEN "Files updated!"
 }
@@ -84,3 +84,8 @@ Function Update-ConfigFiles {
 Generate-Token
 Generate-Issuer
 Update-ConfigFiles
+
+docker pull
+docker up -d --build vault
+$global:initData = (Invoke-RestMethod -Uri http://localhost:8200/v1/sys/init -Method GET)
+$initData
