@@ -68,6 +68,7 @@ Function Update-ConfigFiles {
         $envFile = $envFile.Replace('MPS_WEB_ADMIN_PASSWORD=', $webUiPass)
         $mpsCN = "MPS_COMMON_NAME=$mpsCN"
         $envFile = $envFile.Replace('MPS_COMMON_NAME=localhost', $mpsCN)
+        $envFile = $envFile.Replace('SECRETS_PATH=secret/data/', 'SECRETS_PATH=kv/data/')
         Set-Content ./.env -Value $envFile
     } Catch { Write-Host -ForegroundColor RED "Failed!"; Exit }
     Try {
@@ -110,8 +111,11 @@ Function Init-Vault {
     } Catch { Write-Host -ForegroundColor RED "Failed!"; EXIT }
     Try {
         Write-Host -ForegroundColor CYAN "Adding KV engine..."
-        $sePayload = ([PSCustomObject]@{
+        $sePayload = [PSCustomObject]@{
             type = "kv"
+                options = [PSCustomObject]@{
+                    version = "2"
+                }   
         } | ConvertTo-JSON)
         $vaultHeader = @{ 'X-Vault-Token' = $vaultToken }
         $engineResult = (Invoke-RestMethod http://localhost:8200/v1/sys/mounts/kv -Method POST -Headers $vaultHeader -Body $sePayload)
