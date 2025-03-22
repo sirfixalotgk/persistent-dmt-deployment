@@ -65,6 +65,9 @@ Function Prepare-Certificate {
         openssl rsa -in ./$mpsCN.key -outform PEM -out ./$mpsCN.pem
     } Catch { Write-Host -ForegroundColor YELLOW "Failed to process certificate...continuing without it."; Return }
     Try {
+        If (!(Test-Path ./kong-ssl)) {
+            mkdir ./kong-ssl
+        }
         Move-Item *.pem ./kong-ssl/
         Move-Item *.pfx ./kong-ssl/
         Move-Item *.crt ./kong-ssl/
