@@ -14,17 +14,19 @@
 #     OS platforms (future).                                                                                #
 #                                                                                                           #
 #############################################################################################################
-
+mpsCN=$1
+webUiPass=$2
+dbPass=$3
 echo "Updating APT and installing pre-reqs..."
 apt update
 apt install docker-buildx docker-clean docker-compose-v2 docker-compose docker-doc docker-registry docker.io python3-docker python3-dockerpty -y
 sleep 5
-echo "Installing PowerShell v7.5.0..."
+echo "\n\nInstalling PowerShell v7.5.0..."
 dpkg -i ./utilities/powershell_7.5.0-1.deb_amd64.deb
-echo "Resolving any dependency orphans..."
+echo "\n\nResolving any dependency orphans..."
 apt install -f -y
 sleep 5
-echo "Cloning submodules from Intel(R) AMT Device Management Toolkit repository..."
+echo "\n\nCloning submodules from Intel(R) AMT Device Management Toolkit repository..."
 git clone https://github.com/device-management-toolkit/rps.git
 git clone https://github.com/device-management-toolkit/mps.git
 git clone https://github.com/device-management-toolkit/mps-router.git
@@ -37,5 +39,5 @@ git clone https://github.com/device-management-toolkit/rpc-go.git
 # Cleaning GIT orphans that can cause issues with services that expect empty data directories
 rm -f ./postgres-data/.commit
 rm -f ./vault-pd/.commit
-echo "Calling PowerShell install,init and configuration script...enjoy!"
-pwsh -ExecutionPolicy Bypass -Command "./utilities/install.ps1"
+echo "\n\nCalling PowerShell install,init and configuration script...enjoy!"
+pwsh -ExecutionPolicy Bypass -Command "./utilities/install.ps1 -mpsCN `"$mpsCN`" -webUiPass `"$webUiPass`" -dbPass `"$dbPass`""
