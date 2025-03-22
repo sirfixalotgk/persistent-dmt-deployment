@@ -78,7 +78,7 @@ Function Prepare-Certificate {
         cp ./docker-compose.yml ./pre-cert-compose-file.yml
         $envCertUpdate = (Get-Content ./docker-compose.yml)
         $envCertUpdate = $envCertUpdate.Replace('# - KONG_SSL_CERT=/ssl/oAMT_WebUI_Provisioning.crt', "- KONG_SSL_CERT=/ssl/$mpsCN.crt")
-        $envCertUpdate = $envCertUpdate.Replace('# - KONG_SSL_CERT=/ssl/oAMT_WebUI_Provisioning.pem', "- KONG_SSL_CERT=/ssl/$mpsCN.pem")
+        $envCertUpdate = $envCertUpdate.Replace('# - KONG_SSL_CERT_KEY=/ssl/oAMT_WebUI_Provisioning.pem', "- KONG_SSL_CERT_KEY=/ssl/$mpsCN.pem")
         Set-Content ./docker-compose.yml -Value $envCertUpdate
     } Catch { Write-Host -ForegroundColor YELLOW "Failed to process certificate...continuing without it."; Return }
 }
