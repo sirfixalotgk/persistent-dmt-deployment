@@ -40,4 +40,4 @@ git clone https://github.com/device-management-toolkit/rpc-go.git
 rm -f ./postgres-data/.commit
 rm -f ./vault-pd/.commit
 echo "\n\nCalling PowerShell install,init and configuration script...enjoy!"
-pwsh -ExecutionPolicy Bypass -Command "./utilities/install.ps1 -mpsCN `"$mpsCN`" -webUiPass `"$webUiPass`" -dbPass `"$dbPass`""
+pwsh -ExecutionPolicy Bypass -Command "./utilities/install.ps1 -mpsCN \"$mpsCN\" -webUiPass \"$webUiPass\" -dbPass \"$dbPass\""
