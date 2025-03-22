@@ -185,9 +185,9 @@ Move-Item ./docker-compose.yml ./initial-run-compose-file.yml -Force
 Move-Item ./second-run-compose-file.yml ./docker-compose.yml -Force
 Start-Sleep 2
 If (Test-Path ./$mpsCN.pfx) {
-    Write-Host -ForegroundColor CYAN "`nCertificate PFX found.  Calling processing routine..."
+    Write-Host -ForegroundColor CYAN "`nFound a PFX file in this directory...calling processing routine..."
     Prepare-Certificate
 }
-Write-Host -ForegroundColor CYAN "`nBringing everything up according to dependency configuration..."
+Write-Host -ForegroundColor CYAN "`nBringing all containers online according to dependency configuration in composition file..."
 docker-compose up -d --build
-Write-Host -ForegroundColor GREEN "Done!`n`nPlease the following values -`nVault Root Token: $vaultToken`nVault Unseal Key: $vaultKey"
+Write-Host -ForegroundColor WHITE "`nDone!`n`nPlease note the following values for the secret vault:`nVault Root Token: $vaultToken`nVault Unseal Key: $vaultKey"
