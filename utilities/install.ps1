@@ -98,7 +98,7 @@ Function Init-Vault {
         $envVaultFile = $envVaultFile.Replace('VAULT_KEY=', "VAULT_KEY=$vaultKey")
         $envVaultFile = $envVaultFile.Replace('VAULT_TOKEN=', "VAULT_TOKEN=$vaultToken")
         Set-Content ./.env -Value $envVaultFile
-        Write-Host -ForegroundColor GREEN "Vault initialized!"
+        Write-Host -ForegroundColor GREEN "ENV updated!"
     } Catch { Write-Host -ForegroundColor RED "Failed!"; EXIT }
     Try {
         Write-Host -ForegroundColor CYAN "Un-sealing Vault..."
@@ -113,7 +113,7 @@ Function Init-Vault {
         $sePayload = ([PSCustomObject]@{
             type = "kv"
         } | ConvertTo-JSON)
-        $vaultHeader = [PSCustomObject]@{'X-Vault-Token' = $vaultToken}
+        $vaultHeader = @{ 'X-Vault-Token' = $vaultToken }
         $engineResult = (Invoke-RestMethod http://localhost:8200/v1/sys/mounts/kv -Method POST -Headers $vaultHeader -Body $sePayload)
         Write-Host -ForegroundColor GREEN "Key Vault engine, enabled!"
     } Catch { Write-Host -ForegroundColor RED "Failed!"; EXIT }
@@ -139,9 +139,11 @@ docker-compose up -d --build vault
 Write-Host -ForegroundColor CYAN "Containers downloaded..."
 
 # Initialize Vault and configure
+Write-Host -ForegroundColor CYAN "Holding for 5 seconds to allow Vault to reach ready state..."
+Start-Sleep 5
 Init-Vault
 
-Write-Host -ForegroundColor CYAN "Taking Vault down and bringing all online together..."
+Write-Host -ForegroundColor CYAN "Taking Vault down, building and bringing all online together..."
 docker-compose down -v
 Write-Host -ForegroundColor CYAN "Holding for 2 seconds to allow final sync time to complete..."
 Start-Sleep 2
