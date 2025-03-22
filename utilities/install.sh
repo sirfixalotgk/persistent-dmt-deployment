@@ -37,5 +37,5 @@ git clone https://github.com/device-management-toolkit/rpc-go.git
 # Cleaning GIT orphans that can cause issues with services that expect empty data directories
 rm -f ./postgres-data/.commit
 rm -f ./vault-pd/.commit
-echo "Calling PowerShell install,init and configuration script...enjoy!
+echo "Calling PowerShell install,init and configuration script...enjoy!"
 pwsh -ExecutionPolicy Bypass -Command "./utilities/install.ps1"
