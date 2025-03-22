@@ -15,10 +15,27 @@
 #                                                                                                           #
 #############################################################################################################
 
+echo "Updating APT and installing pre-reqs..."
 apt update
 apt install docker-buildx docker-clean docker-compose-v2 docker-compose docker-doc docker-registry docker.io python3-docker python3-dockerpty -y
 sleep 5
+echo "Installing PowerShell v7.5.0..."
 dpkg -i ./utilities/powershell_7.5.0-1.deb_amd64.deb
+echo "Resolving any dependency orphans..."
 apt install -f -y
 sleep 5
+echo "Cloning submodules from Intel(R) AMT Device Management Toolkit repository..."
+git clone https://github.com/device-management-toolkit/rps.git
+git clone https://github.com/device-management-toolkit/mps.git
+git clone https://github.com/device-management-toolkit/mps-router.git
+git clone https://github.com/device-management-toolkit/ui-toolkit.git
+git clone https://github.com/device-management-toolkit/sample-web-ui.git
+git clone https://github.com/device-management-toolkit/ui-toolkit-react.git
+git clone https://github.com/device-management-toolkit/ui-toolkit-angular.git
+git clone https://github.com/device-management-toolkit/rpc.git
+git clone https://github.com/device-management-toolkit/rpc-go.git
+# Cleaning GIT orphans that can cause issues with services that expect empty data directories
+rm -f ./postgres-data/.commit
+rm -f ./vault-pd/.commit
+echo "Calling PowerShell install,init and configuration script...enjoy!
 pwsh -ExecutionPolicy Bypass -Command "./utilities/install.ps1"
