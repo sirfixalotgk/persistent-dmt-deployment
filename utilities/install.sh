@@ -48,7 +48,7 @@ apt update >> /dev/null
 apt install docker-buildx docker-clean docker-compose-v2 docker-compose docker-doc docker-registry docker.io python3-docker python3-dockerpty -y
 echo -e "\n\nChecking to see if we need PowerShell..."
 checkPwsh=$(apt list | grep powershell)
-if [[ $check == *"powershell"* ]] && [[ $check == *"installed"* ]]; then
+if [[ "$check" == *"powershell"* ]] && [[ "$check" == *"installed"* ]]; then
   echo -e "\n\nAPT reports PowerShell is installed.  If you experience issues, package management may require cleanup."
 else
   echo -e "\n\nInstalling PowerShell v7.5.0..."
