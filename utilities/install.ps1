@@ -56,11 +56,11 @@ Function Generate-Issuer {
 
 Function Prepare-Certificate {
     Try {
-        Write-Host -ForegroundColor CYAN "PFX password needed to process private key:"
-        openssl pkcs12 -in ./$mpsCN.pfx -nocerts -out ./$mpsCN.key
-        Write-Host -ForegroundColor CYAN "PFX password needed to process certificate:"
+        Write-Host -ForegroundColor CYAN "PFX password needed to extract the certificate:"
         openssl pkcs12 -in ./$mpsCN.pfx -clcerts -nokeys -out ./$mpsCN.crt
-        Write-Host -ForegroundColor CYAN "Enter and confirm a  password for private key file:"
+        Write-Host -ForegroundColor CYAN "PFX password needed to extract private key and a pass phrase is required to protect the PEM key.`n(You willenter this pass phrase in the next prompt)"
+        openssl pkcs12 -in ./$mpsCN.pfx -nocerts -out ./$mpsCN.key
+        Write-Host -ForegroundColor CYAN "Enter the pass phrase for the private key PEM file:`n(pass phrase entered and confirmed in the previousstep)"
         openssl rsa -in ./$mpsCN.key -out ./$mpsCN.key
         openssl rsa -in ./$mpsCN.key -outform PEM -out ./$mpsCN.pem
     } Catch { Write-Host -ForegroundColor YELLOW "Failed to process certificate...continuing without it."; Return }
@@ -166,28 +166,31 @@ Generate-Issuer
 Update-ConfigFiles
 
 # Work with the secret vault first
-Write-Host -ForegroundColor CYAN "Downloading Docker containers and initializing the secret store..."
+Write-Host -ForegroundColor CYAN "Downloading containers and bringing up the secret store..."
 docker-compose pull
 docker-compose up -d --build vault
-Write-Host -ForegroundColor CYAN "Containers downloaded..."
+Write-Host -ForegroundColor CYAN "Containers downloaded and Vault coming online..."
 
 # Initialize and configure Vault
-Write-Host -ForegroundColor CYAN "Holding for 5 seconds to allow Vault to reach ready state..."
+Write-Host -ForegroundColor CYAN "Holding for 5 seconds to allow Vault to reach ready state before attempting to initialize and configure..."
 Start-Sleep 5
 Init-Vault
 
-Write-Host -ForegroundColor CYAN "`n`n`nTaking Vault down, building and bringing all online together..."
+Write-Host -ForegroundColor CYAN "`n`n`nTaking Vault offline to build and activate remaining containers after configuration is applied..."
 docker-compose down -v
 Write-Host -ForegroundColor CYAN "`nHolding for 2 seconds to allow final sync time to complete..."
 Start-Sleep 2
-Write-Host -ForegroundColor CYAN "`nReplacing composition file with normal operations variant..."
+Write-Host -ForegroundColor CYAN "`nReplacing composition file with normal operations version of the file..."
 Move-Item ./docker-compose.yml ./initial-run-compose-file.yml -Force
 Move-Item ./second-run-compose-file.yml ./docker-compose.yml -Force
 Start-Sleep 2
 If (Test-Path ./$mpsCN.pfx) {
-    Write-Host -ForegroundColor CYAN "`nFound a PFX file in this directory...calling processing routine..."
+    Write-Host -ForegroundColor CYAN "`nFound a PFX file in this directory...calling certificate processing routine..."
     Prepare-Certificate
 }
-Write-Host -ForegroundColor CYAN "`nBringing all containers online according to dependency configuration in composition file..."
+Write-Host -ForegroundColor CYAN "`nBringing everything online with normal operations composition..."
 docker-compose up -d --build
-Write-Host -ForegroundColor WHITE "`nDone!`n`nPlease note the following values for the secret vault:`nVault Root Token: $vaultToken`nVault Unseal Key: $vaultKey"
+Write-Host -ForegroundColor GREEN "`nDone!`n`nPlease note the following values for the secret vault as you will need them to access Vault.`n"
+Write-Host -ForegroundColor DARKYELLOW -NoNewLine "Vault Root Token: "; Write-Host -ForegroundColor MAGENTA "$vaultToken"
+Write-Host -ForegroundColor DARKYELLOW -NoNewLine "Vault Unseal Key: "; Write-Host -ForegroundColor MAGENTA "$vaultKey"
+Write-Host -ForegroundColor GREEN "Enjoy!"
