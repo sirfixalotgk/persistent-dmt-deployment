@@ -14,9 +14,9 @@
 #############################################################################################################
 tput clear
 echo -e "\e[35mWelcome to the Intel(R) AMT Device Management Toolkit - Cloud Deployment automated installer script.\e[0m"
-echo -e "\n\e[36The Intel(R) AMT Device Management Toolkit (formerly known as Open AMT Cloud Toolkit) default configuration is designed to provide an ephemeral evaluation environment.  All data such as secrets and configurations are removed with reboots, service and/or container restarts with this design. There are methods to adjust the configuration to facilitate the transition from ephemeral to persistent.\n\n\e[35mThis script is designed to automate as well as simplify the deployment of the toolkit and enable persistence during the process. \e[0m"
-echo -e "\n\n\e[33mPlease note: Some credentials are stored in the file system as a result of enable automation and persistence.  Access to the directory that hosts the containers, configurations, etc. should be controlled.  Any and all risk, liability, etc. is assumed by the user when executing this script. \e[0m"
-echo -e "\n\e[34mYou will need to supply some minimal information but then we will take it from there...Thank you and ENJOY!!!! \e[0m\n\n"
+echo -e "\n\e[36mThe Intel(R) AMT Device Management Toolkit (formerly known as Open AMT Cloud Toolkit) default configuration is designed to provide an ephemeral evaluation environment.  All data such as secrets and configurations are removed with reboots, service and/or container restarts with this design. There are methods to adjust the configuration to facilitate the transition from ephemeral to persistent.\n\n\e[35mThis script is designed to automate as well as simplify the deployment of the toolkit and enable persistence during the process. \e[0m"
+echo -e "\n\n\e[33mPlease note: Some credentials are stored in the file system as a result of enable automation and persistence.  Access to the directory that hosts the containers, configurations, etc. should be controlled.\n\n****Any and all risk, liability, etc. is assumed by the user when executing this script.**** \e[0m"
+echo -e "\n\e[35mYou will need to supply some minimal information but then we will take it from there...Thank you and ENJOY!!!! \e[0m\n\n"
 read -p "Please enter the FQDN to be used for this deployment: " mpsCN
 echo -e "\n\n\e[32m\"$mpsCN\" will be used for this deployment. \e[0m\n\n"
 read -ers -p "Please enter the password for the WebUI \"admin\" user: " webUiPass
