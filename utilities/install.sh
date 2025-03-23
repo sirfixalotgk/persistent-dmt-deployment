@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /bin/bash
 #############################################################################################################
 #                                                                                                           #
 #  Device Management ToolKit installation and configuration script...................v0.1.0 21MAR25         #
@@ -12,42 +12,52 @@
 #     OS platforms (future).                                                                                #
 #                                                                                                           #
 #############################################################################################################
+tput clear
+echo "Welcome to the Intel(R) AMT Device Management Toolkit - Cloud Deployment automated installer script."
+echo -e "\nYou need to supply some minimal information but then we'll take it from there...Thank you and ENJOY!!!!\n\n"
 read -p "Please enter the FQDN to be used for this deployment: " mpsCN
-read -s -p "Please enter the password for the WebUI \"admin\" user: " webUiPass
+echo -e "\n\n\"$mpsCN\" will be used for this deployment.\n\n"
+read -ers -p "Please enter the password for the WebUI \"admin\" user: " webUiPass
 if [ -n "$webUiPass" ]; then
-  echo "Password saved."
+  echo -e "Password saved.\n"
 else
   echo "You must supply a password for the admin account."
-  read -s -p "Please enter the password for the WebUI \"admin\" user: " webUiPass
+  read -ers -p "Please enter the password for the WebUI \"admin\" user: " webUiPass
   if [ -z "$webUiPass" ]; then
+    echo -e "\n\n****Password requirement not satisfied...exiting!****"
     exit
+  else
+    echo -e "Password saved.\n"
   fi
 fi
-read -s -p "Please enter the database connection password: " dbPass
+read -ers -p "Please enter the database connection password: " dbPass
 if [ -n "$dbPass" ]; then
-  echo "Password saved."
+  echo -e "Password saved.\n"
 else
   echo "You must supply a password for the database connection."
-  read -s -p "Please enter the database connection password: " dbPass
+  read -ers -p "Please enter the database connection password: " dbPass
   if [ -z "$dbPass" ]; then
+    echo -e "\n\n****Password requirement not satisfied...exiting!****"
     exit
+  else
+    echo -e "Password saved.\n"
   fi
 fi
-echo "\n\nUpdating APT and installing pre-reqs..."
+echo -e "\n\nUpdating APT and installing pre-reqs..."
 apt update >> /dev/null
 apt install docker-buildx docker-clean docker-compose-v2 docker-compose docker-doc docker-registry docker.io python3-docker python3-dockerpty -y
-echo "\n\nChecking to see if we need PowerShell..."
+echo -e "\n\nChecking to see if we need PowerShell..."
 checkPwsh=$(apt list | grep powershell)
 if [[ $check == *"powershell"* ]] && [[ $check == *"installed"* ]]; then
-  echo "\n\nAPT reports PowerShell is installed.  If you experience issues, package management may require cleanup."
+  echo -e "\n\nAPT reports PowerShell is installed.  If you experience issues, package management may require cleanup."
 else
-  echo "\n\nInstalling PowerShell v7.5.0..."
+  echo -e "\n\nInstalling PowerShell v7.5.0..."
   dpkg -i ./utilities/powershell_7.5.0-1.deb_amd64.deb
-  echo "\n\nResolving any dependency orphans..."
+  echo -e "\n\nResolving any dependency orphans..."
   apt install -f -y >> /dev/null
   sleep 1
 fi
-echo "\n\nCloning submodules from Intel(R) AMT Device Management Toolkit repository..."
+echo -e "\n\nCloning submodules from Intel(R) AMT Device Management Toolkit repository..."
 git clone https://github.com/device-management-toolkit/rps.git >> /dev/null
 echo " -- RPS cloned..."
 git clone https://github.com/device-management-toolkit/mps.git >> /dev/null
@@ -65,5 +75,5 @@ echo " -- RPC components cloned..."
 # Cleaning GIT orphans that can cause issues with services that expect empty data directories
 rm -f ./postgres-data/.commit
 rm -f ./vault-pd/.commit
-echo "\n\nCalling PowerShell install,init and configuration script...enjoy!"
+echo -e "\n\nCalling PowerShell install,init and configuration script...enjoy!"
 pwsh -ExecutionPolicy Bypass -Command "./utilities/install.ps1 -mpsCN \"$mpsCN\" -webUiPass \"$webUiPass\" -dbPass \"$dbPass\""
