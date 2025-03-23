@@ -58,9 +58,9 @@ Function Prepare-Certificate {
     Try {
         Write-Host -ForegroundColor CYAN "PFX password needed to extract the certificate:"
         openssl pkcs12 -in ./$mpsCN.pfx -clcerts -nokeys -out ./$mpsCN.crt
-        Write-Host -ForegroundColor CYAN "PFX password needed to extract private key and a pass phrase is required to protect the PEM key.`n(You willenter this pass phrase in the next prompt)"
+        Write-Host -ForegroundColor CYAN "PFX password needed to extract private key and a pass phrase is required to protect the PEM key.`n(You will enter this pass phrase in the next prompt)"
         openssl pkcs12 -in ./$mpsCN.pfx -nocerts -out ./$mpsCN.key
-        Write-Host -ForegroundColor CYAN "Enter the pass phrase for the private key PEM file:`n(pass phrase entered and confirmed in the previousstep)"
+        Write-Host -ForegroundColor CYAN "Enter the pass phrase for the private key PEM file:`n(pass phrase entered and confirmed in the previous step)"
         openssl rsa -in ./$mpsCN.key -out ./$mpsCN.key
         openssl rsa -in ./$mpsCN.key -outform PEM -out ./$mpsCN.pem
     } Catch { Write-Host -ForegroundColor YELLOW "Failed to process certificate...continuing without it."; Return }
@@ -148,7 +148,7 @@ Function Init-Vault {
         } | ConvertTo-JSON)
         $vaultHeader = @{ 'X-Vault-Token' = $vaultToken }
         $engineResult = (Invoke-RestMethod http://localhost:8200/v1/sys/mounts/kv -Method POST -Headers $vaultHeader -Body $sePayload)
-        Write-Host -ForegroundColor GREEN "Key Vault engine, enabled!"
+        Write-Host -ForegroundColor GREEN "Key Value engine, enabled!"
     } Catch { Write-Host -ForegroundColor RED "Failed!"; EXIT }
 }
 
@@ -166,7 +166,7 @@ Generate-Issuer
 Update-ConfigFiles
 
 # Work with the secret vault first
-Write-Host -ForegroundColor CYAN "Downloading containers and bringing up the secret store..."
+Write-Host -ForegroundColor CYAN "Downloading containers and bringing up the secret vault..."
 docker-compose pull
 docker-compose up -d --build vault
 Write-Host -ForegroundColor CYAN "Containers downloaded and Vault coming online..."
@@ -190,7 +190,7 @@ If (Test-Path ./$mpsCN.pfx) {
 }
 Write-Host -ForegroundColor CYAN "`nBringing everything online with normal operations composition..."
 docker-compose up -d --build
-Write-Host -ForegroundColor GREEN "`nDone!`n`nPlease note the following values for the secret vault as you will need them to access Vault.`n"
+Write-Host -ForegroundColor GREEN "`nDone!`nPlease note the following values for the secret vault as they are required for access.`n"
 Write-Host -ForegroundColor DARKYELLOW -NoNewLine "Vault Root Token: "; Write-Host -ForegroundColor MAGENTA "$vaultToken"
 Write-Host -ForegroundColor DARKYELLOW -NoNewLine "Vault Unseal Key: "; Write-Host -ForegroundColor MAGENTA "$vaultKey"
-Write-Host -ForegroundColor GREEN "Enjoy!"
+Write-Host -ForegroundColor GREEN "`n`nEnjoy your deployment of the Intel(R) AMT Device Management Toolkit!`n`n"
