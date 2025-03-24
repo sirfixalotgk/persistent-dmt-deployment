@@ -56,13 +56,23 @@ Function Generate-Issuer {
 
 Function Prepare-Certificate {
     Try {
-        Write-Host -ForegroundColor CYAN "PFX password needed to extract the certificate:"
-        openssl pkcs12 -in ./$mpsCN.pfx -clcerts -nokeys -out ./$mpsCN.crt -passin pass:$pfxPass
-        Write-Host -ForegroundColor CYAN "PFX password needed to extract private key and a pass phrase is required to protect the PEM key.`n(You will enter this pass phrase in the next prompt)"
-        openssl pkcs12 -in ./$mpsCN.pfx -nocerts -out ./$mpsCN.key -passin pass:$pfxPass -passout pass:$pfxPass
-        Write-Host -ForegroundColor CYAN "Enter the pass phrase for the private key PEM file:`n(pass phrase entered and confirmed in the previous step)"
-        openssl rsa -in ./$mpsCN.key -out ./$mpsCN.key -passin pass:$pfxPass
-        openssl rsa -in ./$mpsCN.key -outform PEM -out ./$mpsCN.pem
+        If ([string]::IsNullOrEmpty($pfxPass)) {
+            # Prompt user for each password
+            Write-Host -ForegroundColor CYAN "PFX password needed to extract the certificate:"
+            openssl pkcs12 -in ./$mpsCN.pfx -clcerts -nokeys -out ./$mpsCN.crt
+            Write-Host -ForegroundColor CYAN "PFX password needed to extract private key and a pass phrase is required to protect the PEM key.`n(You will enter this pass phrase in the next prompt)"
+            openssl pkcs12 -in ./$mpsCN.pfx -nocerts -out ./$mpsCN.key
+            Write-Host -ForegroundColor CYAN "Enter the pass phrase for the private key PEM file:`n(pass phrase entered and confirmed in the previous step)"
+            openssl rsa -in ./$mpsCN.key -out ./$mpsCN.key
+            openssl rsa -in ./$mpsCN.key -outform PEM -out ./$mpsCN.pem
+        } Else {
+            # Use supplied password
+            Write-Host -ForegroundColor CYAN "Using PFX password for all steps..."
+            openssl pkcs12 -in ./$mpsCN.pfx -clcerts -nokeys -out ./$mpsCN.crt -passin pass:$pfxPass
+            openssl pkcs12 -in ./$mpsCN.pfx -nocerts -out ./$mpsCN.key -passin pass:$pfxPass -passout pass:$pfxPass
+            openssl rsa -in ./$mpsCN.key -out ./$mpsCN.key -passin pass:$pfxPass
+            openssl rsa -in ./$mpsCN.key -outform PEM -out ./$mpsCN.pem
+        }
     } Catch { Write-Host -ForegroundColor YELLOW "Failed to process certificate...continuing without it."; Return }
     Try {
         If (!(Test-Path ./kong-ssl)) {

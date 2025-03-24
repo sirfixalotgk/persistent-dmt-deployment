@@ -19,41 +19,43 @@ echo -e "\n\n\e[33mNOTE:\nSome sensitive credential/secret information is stored
 echo -e "\n\e[35mYou will need to supply some minimal information but then we will take it from there...Thank you and ENJOY!!!! \e[0m"
 # Prompt for the FQDN to be used with this deployment
 read -p "Please enter the FQDN to be used for this deployment: " mpsCN
-echo -e "\n\e[36m$mpsCN\e[32m will be used for this deployment. \e[0m\n\n"
+echo -e "\n\e[36m$mpsCN\e[32m will be used for this deployment.\n"
 
 # Check to see if there is a certificate PFX in our directory
 pfxCheck=$(ls | grep $mpsCN | grep pfx)
 if [[ "$pfxCheck" == "$mpsCN.pfx" ]]; then
-  echo -e "\n\e[36mIt appears that there is a certificate for \e[32m$mpsCN \e[36min this directory."
-  read -p "Please enter the PFX password: " pfxPass
+  echo -e "\e[36mIt appears that there is a certificate for \e[32m$mpsCN \e[36min this directory."
+  read -ers -p "Please enter the PFX password: " pfxPass
   echo -e "PFX password saved. \e[32m"
 fi
 
 # Capture required passwords and exit if not provided
+echo -e "\e[33m "
 read -ers -p "Please enter the password for the WebUI \"admin\" user: " webUiPass
 if [ -n "$webUiPass" ]; then
-  echo -e "\e[32mPassword saved. \e[0m\n"
+  echo -e "\e[32mPassword saved. \n"
 else
-  echo -e "\e[33mYou must supply a password for the admin account. \e[0m"
+  echo -e "\e[33mYou must supply a password for the admin account."
   read -ers -p "Please enter the password for the WebUI \"admin\" user: " webUiPass
   if [ -z "$webUiPass" ]; then
     echo -e "\n\n\e[31m****Password requirement not satisfied...exiting!**** \e[0m"
     exit
   else
-    echo -e "\e[32mPassword saved. \e[0m\n"
+    echo -e "\e[32mPassword saved. \n"
   fi
 fi
+echo -e "\e[33m "
 read -ers -p "Please enter the database connection password: " dbPass
 if [ -n "$dbPass" ]; then
-  echo -e "\e[32mPassword saved. \e[0m\n"
+  echo -e "\e[32mPassword saved. \n"
 else
-  echo "\e[33mYou must supply a password for the database connection. \e[0m"
+  echo "\e[33mYou must supply a password for the database connection."
   read -ers -p "Please enter the database connection password: " dbPass
   if [ -z "$dbPass" ]; then
     echo -e "\n\n\e[31m****Password requirement not satisfied...exiting!**** \e[0m"
     exit
   else
-    echo -e "\e[32mPassword saved. \e[0m\n"
+    echo -e "\e[32mPassword saved. \n"
   fi
 fi
 
