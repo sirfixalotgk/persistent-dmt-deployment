@@ -18,7 +18,7 @@ echo -e "\n\e[36mThe Intel(R) AMT Device Management Toolkit (formerly known as O
 echo -e "\n\n\e[33mNOTE:\nSome sensitive credential/secret information is stored on the file system as a result of enabling automation and persistence.  Access to the directory that hosts the containers and their configurations should be strictly controlled.\n\n****Any and all risk, liability and/or responsibility for the outcome(s), intended or unintended. is assumed by the user when executing this script.**** \e[0m"
 echo -e "\n\e[35mYou will need to supply some minimal information but then we will take it from there...Thank you and ENJOY!!!! \e[0m"
 read -p "Please enter the FQDN to be used for this deployment: " mpsCN
-echo -e "\n\n\e[36m$mpsCN\e[32m will be used for this deployment. \e[0m\n\n"
+echo -e "\n\e[36m$mpsCN\e[32m will be used for this deployment. \e[0m\n\n"
 read -ers -p "Please enter the password for the WebUI \"admin\" user: " webUiPass
 if [ -n "$webUiPass" ]; then
   echo -e "\e[32mPassword saved. \e[0m\n"
@@ -45,21 +45,21 @@ else
     echo -e "\e[32mPassword saved. \e[0m\n"
   fi
 fi
-echo -e "\n\n\e[32mUpdating APT and installing pre-reqs..."
+echo -e "\n\e[32mUpdating APT and installing pre-reqs..."
 apt update &> /dev/null
 apt install docker-buildx docker-clean docker-compose-v2 docker-compose docker-doc docker-registry docker.io python3-docker python3-dockerpty -y &> /dev/null
-echo -e "\n\nChecking to see if we need PowerShell..."
+echo -e "Checking to see if we need PowerShell..."
 checkPwsh=$(apt list | grep powershell)
 if [[ "$checkPwsh" == *"powershell"* ]] && [[ "$checkPwsh" == *"installed"* ]]; then
-  echo -e "\n\nAPT reports PowerShell is installed.  If you experience issues, package management may require cleanup."
+  echo -e "\nAPT reports PowerShell is installed.  If you experience issues, package management may require cleanup."
 else
-  echo -e "\n\n\e[33mInstalling PowerShell v7.5.0..."
+  echo -e "\n\e[33mInstalling PowerShell v7.5.0..."
   dpkg -i ./utilities/powershell_7.5.0-1.deb_amd64.deb
-  echo -e "\n\nResolving any dependency orphans... \e[0m"
+  echo -e "Resolving any dependency orphans... \e[0m"
   apt install -f -y &> /dev/null
   sleep 1
 fi
-echo -e "\n\n\e[32mCloning submodules from Intel(R) AMT Device Management Toolkit repository..."
+echo -e "\n\e[32mCloning submodules from Intel(R) AMT Device Management Toolkit repository..."
 git clone --quiet https://github.com/device-management-toolkit/rps.git >> /dev/null
 echo " -- RPS cloned..."
 git clone --quiet https://github.com/device-management-toolkit/mps.git >> /dev/null
@@ -75,7 +75,8 @@ git clone --quiet https://github.com/device-management-toolkit/rpc.git >> /dev/n
 git clone --quiet https://github.com/device-management-toolkit/rpc-go.git >> /dev/null
 echo " -- RPC components cloned..."
 # Cleaning GIT orphans that can cause issues with services that expect empty data directories
+echo -e "\n\e[32mCleaning up GIT directory placeholder orphans..."
 rm -f ./postgres-data/.commit
 rm -f ./vault-pd/.commit
-echo -e "\n\n\e[36mCalling PowerShell install, init and configuration script...enjoy! \e[0m"
+echo -e "\n\e[36mCalling PowerShell install, init and configuration script...enjoy! \e[0m"
 pwsh -ExecutionPolicy Bypass -Command "./utilities/install.ps1 -mpsCN \"$mpsCN\" -webUiPass \"$webUiPass\" -dbPass \"$dbPass\""
