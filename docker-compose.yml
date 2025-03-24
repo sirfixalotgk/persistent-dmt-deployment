@@ -7,7 +7,7 @@ services:
   webui:
     image: intel/oact-webui:latest
     networks:
-      - openamtnetwork
+      - devmgmtnet
     build:
       context: ./sample-web-ui
       dockerfile: ./Dockerfile
@@ -24,7 +24,7 @@ services:
   rps:
     image: intel/oact-rps:latest
     networks:
-      - openamtnetwork
+      - devmgmtnet
     build:
       context: ./rps
       dockerfile: ./Dockerfile
@@ -48,7 +48,7 @@ services:
   mps:
     image: intel/oact-mps:latest
     networks:
-      - openamtnetwork
+      - devmgmtnet
     build:
       context: ./mps
       dockerfile: ./Dockerfile
@@ -88,7 +88,7 @@ services:
       context: ./mps-router
       dockerfile: ./Dockerfile
     networks:
-      - openamtnetwork
+      - devmgmtnet
     depends_on:
       db:
         condition: service_healthy
@@ -100,7 +100,7 @@ services:
       dockerfile: ./Dockerfile
     # command: -c ssl=on -c ssl_cert_file=/var/lib/postgresql/server.crt -c ssl_key_file=/var/lib/postgresql/server.key
     networks:
-      - openamtnetwork
+      - devmgmtnet
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U rpsdb"]
       interval: 2s
@@ -124,7 +124,7 @@ services:
   vault:
     image: hashicorp/vault
     networks:
-      - openamtnetwork
+      - devmgmtnet
     ports: 
       - "8200:8200"
     volumes:
@@ -199,7 +199,7 @@ services:
       # - KONG_SSL_CERT=/ssl/oAMT_WebUI_Provisioning.crt
       # - KONG_SSL_CERT_KEY=/ssl/oAMT_WebUI_Provisioning.pem
     networks:
-      - openamtnetwork
+      - devmgmtnet
     volumes:
       - ./kong.yaml:/home/kong/kong.yml
       - ./kong-ssl:/ssl
@@ -219,10 +219,10 @@ services:
   #   volumes: 
   #     - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
   #   networks:
-  #     - openamtnetwork
+  #     - devmgmtnet
 volumes:
     app-volume:
     private-volume:
 networks: 
-  openamtnetwork:
+  devmgmtnet:
     driver: "bridge"
