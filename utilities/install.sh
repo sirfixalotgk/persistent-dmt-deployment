@@ -14,11 +14,11 @@
 #############################################################################################################
 tput clear
 echo -e "\e[35mWelcome to the Intel(R) AMT Device Management Toolkit - Cloud Deployment automated installer script.\e[0m"
-echo -e "\n\e[36mThe Intel(R) AMT Device Management Toolkit (formerly known as Open AMT Cloud Toolkit) default configuration is designed to provide an ephemeral evaluation environment.  All data such as secrets and configurations are removed with reboots, service and/or container restarts with this design. With additional configuration, this can be altered to facilitate persistence. \n\n\e[35mThis script is designed to enable persistence at the time of deployment as well as automate and simplify the process. \e[0m"
-echo -e "\n\n\e[33mNOTE:\nSome credentials are stored in the file system as a result of enabling automation and persistence.  Access to the directory that hosts the containers, configurations, etc. should be controlled.\n\n****Any and all risk, liability, etc. is assumed by the user when executing this script.**** \e[0m"
+echo -e "\n\e[36mThe Intel(R) AMT Device Management Toolkit (formerly known as Open AMT Cloud Toolkit) default configuration is designed to provide an ephemeral evaluation environment.  All data such as secrets and configurations are removed with reboots, service and/or container restarts with this design. With additional configuration, this can be altered to facilitate persistence. \n\n\e[35mThis script is designed to enable persistence at the time of deployment as well as automate and simplify the deployment process. \e[0m"
+echo -e "\n\n\e[33mNOTE:\nSome sensitive credential/secret information is stored on the file system as a result of enabling automation and persistence.  Access to the directory that hosts the containers and their configurations should be strictly controlled.\n\n****Any and all risk, liability and/or responsibility for the outcome(s), intended or unintended. is assumed by the user when executing this script.**** \e[0m"
 echo -e "\n\e[35mYou will need to supply some minimal information but then we will take it from there...Thank you and ENJOY!!!! \e[0m"
 read -p "Please enter the FQDN to be used for this deployment: " mpsCN
-echo -e "\n\n\e[32m\'$mpsCN\' will be used for this deployment. \e[0m\n\n"
+echo -e "\n\n\e[36m$mpsCN\e[32m will be used for this deployment. \e[0m\n\n"
 read -ers -p "Please enter the password for the WebUI \"admin\" user: " webUiPass
 if [ -n "$webUiPass" ]; then
   echo -e "\e[32mPassword saved. \e[0m\n"
@@ -46,8 +46,8 @@ else
   fi
 fi
 echo -e "\n\n\e[32mUpdating APT and installing pre-reqs..."
-apt update >> /dev/null
-apt install docker-buildx docker-clean docker-compose-v2 docker-compose docker-doc docker-registry docker.io python3-docker python3-dockerpty -y
+apt update &> /dev/null
+apt install docker-buildx docker-clean docker-compose-v2 docker-compose docker-doc docker-registry docker.io python3-docker python3-dockerpty -y &> /dev/null
 echo -e "\n\nChecking to see if we need PowerShell..."
 checkPwsh=$(apt list | grep powershell)
 if [[ "$checkPwsh" == *"powershell"* ]] && [[ "$checkPwsh" == *"installed"* ]]; then
@@ -56,26 +56,26 @@ else
   echo -e "\n\n\e[33mInstalling PowerShell v7.5.0..."
   dpkg -i ./utilities/powershell_7.5.0-1.deb_amd64.deb
   echo -e "\n\nResolving any dependency orphans... \e[0m"
-  apt install -f -y >> /dev/null
+  apt install -f -y &> /dev/null
   sleep 1
 fi
 echo -e "\n\n\e[32mCloning submodules from Intel(R) AMT Device Management Toolkit repository..."
-git clone https://github.com/device-management-toolkit/rps.git >> /dev/null
+git clone --quiet https://github.com/device-management-toolkit/rps.git >> /dev/null
 echo " -- RPS cloned..."
-git clone https://github.com/device-management-toolkit/mps.git >> /dev/null
+git clone --quiet https://github.com/device-management-toolkit/mps.git >> /dev/null
 echo " -- MPS cloned..."
-git clone https://github.com/device-management-toolkit/mps-router.git >> /dev/null
+git clone --quiet https://github.com/device-management-toolkit/mps-router.git >> /dev/null
 echo " -- MPS Router cloned..."
-git clone https://github.com/device-management-toolkit/ui-toolkit.git >> /dev/null
-git clone https://github.com/device-management-toolkit/sample-web-ui.git >> /dev/null
-git clone https://github.com/device-management-toolkit/ui-toolkit-react.git >> /dev/null
-git clone https://github.com/device-management-toolkit/ui-toolkit-angular.git >> /dev/null
+git clone --quiet https://github.com/device-management-toolkit/ui-toolkit.git >> /dev/null
+git clone --quiet https://github.com/device-management-toolkit/sample-web-ui.git >> /dev/null
+git clone --quiet https://github.com/device-management-toolkit/ui-toolkit-react.git >> /dev/null
+git clone --quiet https://github.com/device-management-toolkit/ui-toolkit-angular.git >> /dev/null
 echo " -- UI samples and integration kits cloned..."
-git clone https://github.com/device-management-toolkit/rpc.git >> /dev/null
-git clone https://github.com/device-management-toolkit/rpc-go.git >> /dev/null
+git clone --quiet https://github.com/device-management-toolkit/rpc.git >> /dev/null
+git clone --quiet https://github.com/device-management-toolkit/rpc-go.git >> /dev/null
 echo " -- RPC components cloned..."
 # Cleaning GIT orphans that can cause issues with services that expect empty data directories
 rm -f ./postgres-data/.commit
 rm -f ./vault-pd/.commit
-echo -e "\n\n\e[36mCalling PowerShell install,init and configuration script...enjoy! \e[0m"
+echo -e "\n\n\e[36mCalling PowerShell install, init and configuration script...enjoy! \e[0m"
 pwsh -ExecutionPolicy Bypass -Command "./utilities/install.ps1 -mpsCN \"$mpsCN\" -webUiPass \"$webUiPass\" -dbPass \"$dbPass\""
