@@ -23,7 +23,9 @@ param (
     [Parameter(Mandatory = $false, Position=3)]
     [string]$dbUser = "postgresadmin", 
     [Parameter(Mandatory = $true, Position=4)]
-    [string]$dbPass
+    [string]$dbPass,
+    [Parameter(Mandatory = $false, Position=5)]
+    [string]$pfxPass
 )
 
 Function Generate-Token {
@@ -37,7 +39,6 @@ Function Generate-Token {
     }
     $script:kongSecret = "secret: `"$Token`""
     $script:Token = "MPS_JWT_SECRET=$Token"
-    # return $Token
 }
 
 Function Generate-Issuer {
@@ -51,17 +52,16 @@ Function Generate-Issuer {
     }
     $script:kongKey = "key: $Issuer"
     $script:Issuer = "MPS_JWT_ISSUER=$Issuer"
-    # return $Issuer
 }
 
 Function Prepare-Certificate {
     Try {
         Write-Host -ForegroundColor CYAN "PFX password needed to extract the certificate:"
-        openssl pkcs12 -in ./$mpsCN.pfx -clcerts -nokeys -out ./$mpsCN.crt
+        openssl pkcs12 -in ./$mpsCN.pfx -clcerts -nokeys -out ./$mpsCN.crt -passin pass:$pfxPass
         Write-Host -ForegroundColor CYAN "PFX password needed to extract private key and a pass phrase is required to protect the PEM key.`n(You will enter this pass phrase in the next prompt)"
-        openssl pkcs12 -in ./$mpsCN.pfx -nocerts -out ./$mpsCN.key
+        openssl pkcs12 -in ./$mpsCN.pfx -nocerts -out ./$mpsCN.key -passin pass:$pfxPass -passout pass:$pfxPass
         Write-Host -ForegroundColor CYAN "Enter the pass phrase for the private key PEM file:`n(pass phrase entered and confirmed in the previous step)"
-        openssl rsa -in ./$mpsCN.key -out ./$mpsCN.key
+        openssl rsa -in ./$mpsCN.key -out ./$mpsCN.key -passin pass:$pfxPass
         openssl rsa -in ./$mpsCN.key -outform PEM -out ./$mpsCN.pem
     } Catch { Write-Host -ForegroundColor YELLOW "Failed to process certificate...continuing without it."; Return }
     Try {
