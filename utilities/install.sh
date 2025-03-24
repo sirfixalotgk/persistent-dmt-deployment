@@ -26,7 +26,11 @@ pfxCheck=$(ls | grep $mpsCN | grep pfx)
 if [[ "$pfxCheck" == "$mpsCN.pfx" ]]; then
   echo -e "\e[36mIt appears that there is a certificate for \e[32m$mpsCN \e[36min this directory."
   read -ers -p "Please enter the PFX password: " pfxPass
-  echo -e "PFX password saved. \e[32m"
+  if [ -n "$pfxPass" ]; then
+    echo -e "PFX password saved. \e[32m"
+  else
+    echo -e "\e[33mNo password provided...you will be prompted again when an attempt is made to import it. \e[32m"
+  fi
 fi
 
 # Capture required passwords and exit if not provided
@@ -66,9 +70,11 @@ apt install docker-buildx docker-clean docker-compose-v2 docker-compose docker-d
 
 # Check for PowerShell via APT (need to adjust this to look for the binary due to multiple sources)
 echo -e "Checking to see if we need PowerShell..."
-checkPwsh=$(apt list | grep powershell)
-if [[ "$checkPwsh" == *"powershell"* ]] && [[ "$checkPwsh" == *"installed"* ]]; then
-  echo -e "\nAPT reports PowerShell is installed.  If you experience issues, package management may require cleanup."
+#checkPwsh=$(apt list | grep powershell)
+#if [[ "$checkPwsh" == *"powershell"* ]] && [[ "$checkPwsh" == *"installed"* ]]; then
+checkPwsh=$(ls -l /usr/bin | grep pwsh)
+if [[ "$checkPwsh" == *"pwsh"* ]]; then
+  echo -e "\nPowerShell appears to installed: $checkPwsh"
 else
   echo -e "\n\e[33mInstalling PowerShell v7.5.0..."
   dpkg -i ./utilities/powershell_7.5.0-1.deb_amd64.deb
