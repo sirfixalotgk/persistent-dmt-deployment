@@ -18,8 +18,12 @@ echo -e "\n\e[36mThe Intel(R) AMT Device Management Toolkit (formerly known as O
 echo -e "\n\n\e[33mNOTE:\nSome sensitive credential/secret information is stored on the file system as a result of enabling automation and persistence.  Access to the directory that hosts the containers and their configurations should be strictly controlled.\n\n****Any and all risk, liability and/or responsibility for the outcome(s), intended or unintended. is assumed by the user when executing this script.**** \e[0m"
 echo -e "\n\e[35mYou will need to supply some minimal information but then we will take it from there...Thank you and ENJOY!!!! \e[0m"
 # Prompt for the FQDN to be used with this deployment
-read -p "Please enter the FQDN to be used for this deployment: " mpsCN
-echo -e "\n\e[36m$mpsCN\e[32m will be used for this deployment.\n"
+if [ -z "$1" ]; then
+  read -p "Please enter the FQDN to be used for this deployment: " mpsCN
+  echo -e "\n\e[36m$mpsCN\e[32m will be used for this deployment.\n"
+else
+  mpsCN=$1
+fi
 
 # Check to see if there is a certificate PFX in our directory
 pfxCheck=$(ls | grep $mpsCN | grep pfx)
@@ -34,35 +38,43 @@ if [[ "$pfxCheck" == "$mpsCN.pfx" ]]; then
 fi
 
 # Capture required passwords and exit if not provided
-echo -e "\e[33m "
-read -ers -p "Please enter the password for the WebUI \"admin\" user: " webUiPass
-if [ -n "$webUiPass" ]; then
-  echo -e "\e[32mPassword saved. \n"
-else
-  echo -e "\e[33mYou must supply a password for the admin account."
+if [ -z "$2" ]; then
+  echo -e "\e[33m "
   read -ers -p "Please enter the password for the WebUI \"admin\" user: " webUiPass
-  if [ -z "$webUiPass" ]; then
-    echo -e "\n\n\e[31m****Password requirement not satisfied...exiting!**** \e[0m"
-    exit
-  else
+  if [ -n "$webUiPass" ]; then
     echo -e "\e[32mPassword saved. \n"
+  else
+    echo -e "\e[33mYou must supply a password for the admin account."
+    read -ers -p "Please enter the password for the WebUI \"admin\" user: " webUiPass
+    if [ -z "$webUiPass" ]; then
+      echo -e "\n\n\e[31m****Password requirement not satisfied...exiting!**** \e[0m"
+      exit
+    else
+      echo -e "\e[32mPassword saved. \n"
+    fi
   fi
+else
+  webUiPass=$2
 fi
 echo -e "\e[33m "
-read -ers -p "Please enter the database connection password: " dbPass
-if [ -n "$dbPass" ]; then
-  echo -e "\e[32mPassword saved. \n"
-else
-  echo "\e[33mYou must supply a password for the database connection."
+# Collect password for Postgres DB user
+if [ -z "$3" ]; then
   read -ers -p "Please enter the database connection password: " dbPass
-  if [ -z "$dbPass" ]; then
-    echo -e "\n\n\e[31m****Password requirement not satisfied...exiting!**** \e[0m"
-    exit
-  else
+  if [ -n "$dbPass" ]; then
     echo -e "\e[32mPassword saved. \n"
+  else
+    echo "\e[33mYou must supply a password for the database connection."
+    read -ers -p "Please enter the database connection password: " dbPass
+    if [ -z "$dbPass" ]; then
+      echo -e "\n\n\e[31m****Password requirement not satisfied...exiting!**** \e[0m"
+      exit
+    else
+      echo -e "\e[32mPassword saved. \n"
+    fi
   fi
+else
+  dbPass=$3
 fi
-
 # Start performing actions
 echo -e "\n\e[32mUpdating APT and installing pre-reqs..."
 apt update &> /dev/null
