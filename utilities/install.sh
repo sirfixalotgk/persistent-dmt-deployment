@@ -95,23 +95,6 @@ else
   sleep 1
 fi
 
-# Pull latest versions directory from toolkit GIT repo
-echo -e "\n\e[32mCloning submodules from Intel(R) AMT Device Management Toolkit repository..."
-git clone --quiet https://github.com/device-management-toolkit/rps.git >> /dev/null
-echo " -- RPS cloned..."
-git clone --quiet https://github.com/device-management-toolkit/mps.git >> /dev/null
-echo " -- MPS cloned..."
-git clone --quiet https://github.com/device-management-toolkit/mps-router.git >> /dev/null
-echo " -- MPS Router cloned..."
-git clone --quiet https://github.com/device-management-toolkit/ui-toolkit.git >> /dev/null
-git clone --quiet https://github.com/device-management-toolkit/sample-web-ui.git >> /dev/null
-git clone --quiet https://github.com/device-management-toolkit/ui-toolkit-react.git >> /dev/null
-git clone --quiet https://github.com/device-management-toolkit/ui-toolkit-angular.git >> /dev/null
-echo " -- UI samples and integration kits cloned..."
-git clone --quiet https://github.com/device-management-toolkit/rpc.git >> /dev/null
-git clone --quiet https://github.com/device-management-toolkit/rpc-go.git >> /dev/null
-echo " -- RPC components cloned..."
-
 # Cleaning GIT orphans that can cause issues with services that expect empty data directories
 echo -e "\n\e[32mCleaning up GIT directory placeholder orphans..."
 rm -f ./postgres-data/.commit
