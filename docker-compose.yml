@@ -2,7 +2,8 @@
 # Copyright (c) Intel Corporation 2020
 # SPDX-License-Identifier: Apache-2.0
 #**********************************************************************/
-version: '3.3'
+name: persistent-dev-mgmt-toolkit
+
 services: 
   webui:
     image: intel/oact-webui:latest
@@ -167,16 +168,33 @@ services:
     #   retries: 3
     #   start_period: 15s
     restart: always
+    # Un-comment to use consul (untested)
+    #  consul:
+    #    restart: always
+    #    image: hashicorp/consul
+    #    networks:
+    #      - openamtnetwork
+    #    ports: 
+    #      - 8500:8500
+    #    profiles:
+    #      - consul
+    #    volumes: 
+    #      - type: volume 
+    #        source: consul-config 
+    #        target: /consul/config 
+    #        volume: {} 
+    #      - type: volume 
+    #        source: consul-data 
+    #        target: /consul/data 
+    #        volume: {}    
+    #    command: "agent -server -ui -node=OACT-1 -bootstrap-expect=1 -client=0.0.0.0"
   kong:
-    image: kong:2.3
+    image: kong:3.1
     healthcheck:
-      test:
-        - CMD
-        - nc
-        - -z
-        - localhost
-        - "8443"
-      retries: 10
+      test: ["CMD", "kong", "health"]
+      interval: 10s
+      timeout: 10s
+      retries: 10    
     command:
       - "kong"
       - "start"
@@ -210,16 +228,16 @@ services:
       db:
         condition: service_healthy
     restart: always
-  # Mosquitto disabled (not needed)
-  #
-  # mosquitto:
-  #   image: eclipse-mosquitto
-  #   ports:
-  #     - 8883:8883
-  #   volumes: 
-  #     - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
-  #   networks:
-  #     - devmgmtnet
+      # Mosquitto disabled (not needed)
+      #
+      # mosquitto:
+      #   image: eclipse-mosquitto
+      #   ports:
+      #     - 8883:8883
+      #   volumes: 
+      #     - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+      #   networks:
+      #     - devmgmtnet
 volumes:
     app-volume:
     private-volume:
