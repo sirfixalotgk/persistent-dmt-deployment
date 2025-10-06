@@ -2,8 +2,7 @@
 # Copyright (c) Intel Corporation 2020
 # SPDX-License-Identifier: Apache-2.0
 #**********************************************************************/
-version: '3.3'
-name: persistent-dev-mgmt-toolkit
+# version: '3.3'
 
 services: 
   webui:
