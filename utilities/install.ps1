@@ -31,7 +31,7 @@ param (
 Function Generate-Token {
     param (
         [int]$Length = 32,
-        [string]$CharacterSet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*"
+        [string]$CharacterSet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#%^&*"
     )
     $Token = ""
     for ($i = 0; $i -lt $Length; $i++) {
@@ -192,6 +192,15 @@ If (Test-Path ./$mpsCN.pfx) {
 }
 Write-Host -ForegroundColor CYAN "`nBringing everything online with normal operations composition..."
 docker-compose up -d --build
+Write-Host -ForegroundColor CYAN "`nUpdating to the latest version..."
+Start-Sleep 2
+docker-compose down -v
+Write-Host -ForegroundColor CYAN "`nPerforming `"docker-compose pull`" of latest version from source repo..."
+docker-compose pull
+Start-Sleep 2
+Write-Host -ForegroundColor CYAN "`nBringing everything back online..."
+Start-Sleep 2
+docker-compose up -d
 Write-Host -ForegroundColor GREEN "`nDone!`nPlease note the following values for the secret vault as they are required for access.`n"
 Write-Host -ForegroundColor DARKYELLOW -NoNewLine "Vault Root Token: "; Write-Host -ForegroundColor MAGENTA "$vaultToken"
 Write-Host -ForegroundColor DARKYELLOW -NoNewLine "Vault Unseal Key: "; Write-Host -ForegroundColor MAGENTA "$vaultKey"
